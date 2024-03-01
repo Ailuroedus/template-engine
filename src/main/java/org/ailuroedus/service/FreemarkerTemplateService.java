@@ -54,18 +54,18 @@ public class FreemarkerTemplateService implements TemplateService {
                             if (Files.size(p) == 0) {
                                 Files.delete(p);
                             } else {
-                                var isCleanFile = false;
+                                var shouldCleanFile = false;
 
                                 try (final var outputPathReader = FileChannel.open(p, StandardOpenOption.READ)) {
                                     final var buffer = ByteBuffer.allocate(TemplateConstants.SERVICE_RECORD.length());
                                     outputPathReader.read(buffer);
                                     if (TemplateConstants.SERVICE_RECORD
                                             .equals(new String(buffer.array(), Charset.defaultCharset()))) {
-                                        isCleanFile = true;
+                                        shouldCleanFile = true;
                                     }
                                 }
 
-                                if (isCleanFile) {
+                                if (shouldCleanFile) {
                                     Files.write(p, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
                                 }
                             }
