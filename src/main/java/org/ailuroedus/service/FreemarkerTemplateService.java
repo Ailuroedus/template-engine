@@ -2,9 +2,6 @@ package org.ailuroedus.service;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.FileVisitResult;
@@ -13,8 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
-@Service
+
 @RequiredArgsConstructor
 public class FreemarkerTemplateService implements TemplateService {
     private final Configuration configuration;
