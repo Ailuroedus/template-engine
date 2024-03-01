@@ -7,10 +7,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.ailuroedus.constant.TemplateConstants;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,29 +47,32 @@ public class FreemarkerTemplateService implements TemplateService {
 
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                final var outputFiles = output.resolve(templatePath.relativize(dir)).toFile().listFiles();
-                if (outputFiles == null) {
-                    return FileVisitResult.CONTINUE;
-                }
-                for (final var file : outputFiles) {
-                    if (file.length() == 0) {
-                        final var isDeleted = file.delete();
-                        if (!isDeleted) {
-                            // TODO Подумать как правильно обработать удаление файла
-                            log.warn("Не удалось удалить файл {}", file);
-                        }
-                    } else {
-                        var isLeaveEmpty = false;
-                        try (final var bufferedReader = new BufferedReader(new FileReader(file))) {
-                            if (TemplateConstants.SERVICE_RECORD.equals(bufferedReader.readLine())) {
-                                isLeaveEmpty = true;
+                try (final var outputPath = Files.walk(output.resolve(templatePath.relativize(dir)))) {
+                    log.info("Приступаем к постобработке файла {}", outputPath);
+                    outputPath.filter(Files::isRegularFile).forEach(p -> {
+                        try {
+                            if (Files.size(p) == 0) {
+                                Files.delete(p);
+                            } else {
+                                var isCleanFile = false;
+
+                                try (final var outputPathReader = FileChannel.open(p, StandardOpenOption.READ)) {
+                                    final var buffer = ByteBuffer.allocate(TemplateConstants.SERVICE_RECORD.length());
+                                    outputPathReader.read(buffer);
+                                    if (TemplateConstants.SERVICE_RECORD
+                                            .equals(new String(buffer.array(), Charset.defaultCharset()))) {
+                                        isCleanFile = true;
+                                    }
+                                }
+
+                                if (isCleanFile) {
+                                    Files.write(p, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
+                                }
                             }
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
                         }
-                        if (isLeaveEmpty) {
-                            try (var ignored = Files.newBufferedWriter(file.toPath(), StandardOpenOption.TRUNCATE_EXISTING)) {
-                            }
-                        }
-                    }
+                    });
                 }
 
                 return FileVisitResult.CONTINUE;
