@@ -11,6 +11,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @SpringBootTest
 public class FreemarkerTemplateServiceTest {
     @Autowired
@@ -26,8 +29,10 @@ public class FreemarkerTemplateServiceTest {
         templateService.template(
                 simpleTemplate.getFile().toPath(),
                 Map.of("name", expectedOutputName,
-                        "changelogEnabled", true),
+                        "changelogEnabled", false),
                 tempDir.toPath()
         );
+
+        assertNotNull(tempDir.listFiles());
     }
 }

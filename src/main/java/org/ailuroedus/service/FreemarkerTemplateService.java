@@ -32,6 +32,15 @@ public class FreemarkerTemplateService implements TemplateService {
         configuration.setDirectoryForTemplateLoading(templatePath.toFile());
         Files.walkFileTree(templatePath, new SimpleFileVisitor<>() {
             @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                final var replacedPath = templatePath.relativize(dir);
+                final var outputPath = output.resolve(replacedPath);
+                Files.createDirectories(outputPath);
+
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 final var replacedPath = templatePath.relativize(file).toString();
                 final var template = configuration.getTemplate(replacedPath);
