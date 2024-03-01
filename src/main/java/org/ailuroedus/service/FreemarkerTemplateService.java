@@ -56,9 +56,9 @@ public class FreemarkerTemplateService implements TemplateService {
 
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                try (final var outputPath = Files.walk(output.resolve(templatePath.relativize(dir)))) {
-                    log.info("Приступаем к постобработке файла {}", outputPath);
+                try (final var outputPath = Files.walk(output.resolve(templatePath.relativize(dir)), 1)) {
                     outputPath.filter(Files::isRegularFile).forEach(p -> {
+                        log.info("Приступаем к постобработке файла {}", p);
                         try {
                             if (Files.size(p) == 0) {
                                 Files.delete(p);
