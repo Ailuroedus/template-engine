@@ -1,7 +1,5 @@
 package org.ailuroedus.util;
 
-import org.ailuroedus.constant.TemplateConstants;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
@@ -14,7 +12,7 @@ import java.nio.file.StandardOpenOption;
 public final class FileUtil {
     public static String readFirstSymbols(Path file, int length) {
         try (final var outputPathReader = FileChannel.open(file, StandardOpenOption.READ)) {
-            final var buffer = ByteBuffer.allocate(TemplateConstants.SERVICE_RECORD.length());
+            final var buffer = ByteBuffer.allocate(length);
             outputPathReader.read(buffer);
             return new String(buffer.array(), Charset.defaultCharset());
         } catch (IOException e) {
