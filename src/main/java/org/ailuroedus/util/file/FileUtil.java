@@ -1,4 +1,4 @@
-package org.ailuroedus.util;
+package org.ailuroedus.util.file;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

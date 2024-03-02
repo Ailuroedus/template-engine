@@ -2,7 +2,7 @@ package org.ailuroedus.config;
 
 import freemarker.template.TemplateBooleanModel;
 import freemarker.template.TemplateMethodModelEx;
-import org.ailuroedus.constant.TemplateConstants;
+import org.ailuroedus.util.template.TemplateConstants;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

@@ -1,5 +1,6 @@
-package org.ailuroedus.service;
+package org.ailuroedus.service.freemarker;
 
+import org.ailuroedus.service.freemarker.FreemarkerTemplateService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,7 @@ public class FreemarkerTemplateServiceTest {
         templateService.template(
                 simpleTemplate.getFile().toPath(),
                 Map.of("name", expectedOutputName,
-                        "changelogEnabled", true),
+                        "changelogEnabled", false),
                 tempDir.toPath()
         );
 
