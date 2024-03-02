@@ -5,19 +5,16 @@ import freemarker.template.TemplateException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ailuroedus.constant.TemplateConstants;
+import org.ailuroedus.util.FileUtil;
 import org.springframework.stereotype.Service;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 
@@ -56,26 +53,24 @@ public class FreemarkerTemplateService implements TemplateService {
 
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                log.info("Приступаем к постобработке директории '{}'", dir);
                 try (final var outputPath = Files.walk(output.resolve(templatePath.relativize(dir)), 1)) {
-                    outputPath.filter(Files::isRegularFile).forEach(p -> {
-                        log.info("Приступаем к постобработке файла {}", p);
+                    outputPath.forEach(p -> {
                         try {
-                            if (Files.size(p) == 0) {
+                            if (Files.isDirectory(p) && FileUtil.isEmptyDir(p)) {
+                                log.info("Обнаружена пустая директория: {}", p);
                                 Files.delete(p);
-                            } else {
-                                var shouldCleanFile = false;
-
-                                try (final var outputPathReader = FileChannel.open(p, StandardOpenOption.READ)) {
-                                    final var buffer = ByteBuffer.allocate(TemplateConstants.SERVICE_RECORD.length());
-                                    outputPathReader.read(buffer);
-                                    if (TemplateConstants.SERVICE_RECORD
-                                            .equals(new String(buffer.array(), Charset.defaultCharset()))) {
-                                        shouldCleanFile = true;
+                            } else if (Files.isRegularFile(p)) {
+                                if (Files.size(p) == 0) {
+                                    log.info("Обнаружен пустой файл: {}", p);
+                                    Files.delete(p);
+                                } else {
+                                    final var firstFileSymbols
+                                            = FileUtil.readFirstSymbols(p, TemplateConstants.SERVICE_RECORD.length());
+                                    if (TemplateConstants.SERVICE_RECORD.equals(firstFileSymbols)) {
+                                        log.info("Обнаружен файл c служебной записью: {}", p);
+                                        FileUtil.truncateFile(p);
                                     }
-                                }
-
-                                if (shouldCleanFile) {
-                                    Files.write(p, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
                                 }
                             }
                         } catch (IOException e) {
@@ -83,7 +78,7 @@ public class FreemarkerTemplateService implements TemplateService {
                         }
                     });
                 }
-
+                log.info("Постобработко директории '{}' завершена", dir);
                 return FileVisitResult.CONTINUE;
             }
         });

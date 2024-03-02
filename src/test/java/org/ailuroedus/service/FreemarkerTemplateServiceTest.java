@@ -28,7 +28,7 @@ public class FreemarkerTemplateServiceTest {
         templateService.template(
                 simpleTemplate.getFile().toPath(),
                 Map.of("name", expectedOutputName,
-                        "changelogEnabled", false),
+                        "changelogEnabled", true),
                 tempDir.toPath()
         );
 
