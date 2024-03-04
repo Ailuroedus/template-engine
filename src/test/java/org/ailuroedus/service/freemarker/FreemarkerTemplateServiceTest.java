@@ -1,18 +1,18 @@
-package org.ailuroedus.service;
+package org.ailuroedus.service.freemarker;
 
+import org.ailuroedus.service.freemarker.FreemarkerTemplateService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class FreemarkerTemplateServiceTest {
@@ -23,16 +23,16 @@ public class FreemarkerTemplateServiceTest {
     private Resource simpleTemplate;
 
     @Test
-    public void happyPathTemplateTest() throws IOException {
+    public void happyPathTemplateTest(@TempDir File tempDir) throws IOException {
         final var expectedOutputName = "Misha";
 
-        try (final var output = new StringWriter()) {
-            templateService.template(simpleTemplate.getFile().toPath(), Map.of("name", expectedOutputName), output);
+        templateService.template(
+                simpleTemplate.getFile().toPath(),
+                Map.of("name", expectedOutputName,
+                        "changelogEnabled", false),
+                tempDir.toPath()
+        );
 
-            final var actualOutput = output.toString();
-            assertNotNull(actualOutput);
-            assertFalse(actualOutput.isEmpty());
-            assertTrue(actualOutput.contains(expectedOutputName));
-        }
+        assertNotNull(tempDir.listFiles());
     }
 }
