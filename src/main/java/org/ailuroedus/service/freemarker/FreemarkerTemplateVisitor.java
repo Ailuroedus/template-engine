@@ -1,3 +1,19 @@
+/*
+ * Copyright [2024] [Ailuroedus team]
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.ailuroedus.service.freemarker;
 
 import freemarker.template.Configuration;
@@ -89,7 +105,7 @@ public class FreemarkerTemplateVisitor extends SimpleFileVisitor<Path> {
     }
 
 
-    private Path templatePathIfNecessary(Path path, Map<String, Object> context) throws IOException {
+    protected Path templatePathIfNecessary(Path path, Map<String, Object> context) throws IOException {
         if (TemplateUtil.shouldTemplatePath(path)) {
             final var pathTemplate
                     = new Template(path.getFileName().toString(), path.toString(), configuration);
@@ -102,7 +118,7 @@ public class FreemarkerTemplateVisitor extends SimpleFileVisitor<Path> {
         return path;
     }
 
-    private void template(Template template, Map<String, Object> context, Writer writer) {
+    protected void template(Template template, Map<String, Object> context, Writer writer) {
         try {
             template.process(context, writer);
         } catch (TemplateException e) {

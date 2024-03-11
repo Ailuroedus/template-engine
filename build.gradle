@@ -1,34 +1,99 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.2.3'
-	id 'io.spring.dependency-management' version '1.1.4'
+    id 'java'
+    id 'org.springframework.boot' version '3.2.3'
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'maven-publish'
+    id 'signing'
 }
 
 group = 'org.ailuroedus'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	sourceCompatibility = '21'
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    withJavadocJar()
+    withSourcesJar()
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-freemarker'
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-freemarker'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+publishing {
+    repositories {
+        maven {
+            url = version.endsWith('SNAPSHOT')
+                    ? 'https://s01.oss.sonatype.org/content/repositories/snapshots/'
+                    : 'https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = project.properties["ossrhUsername"]
+                password = project.properties["ossrhPassword"]
+            }
+        }
+    }
+    publications {
+        maven(MavenPublication) {
+            pom {
+                name = 'Ailuroedus template engine'
+                description = 'Template core engine'
+                url = 'https://ailuroedus.github.io'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'fufaevmv'
+                        name = 'Michail Fufaev'
+                        email = 'fufaev@sibur.ru'
+                    }
+                    developer {
+						id = 'atkinarv'
+                        name = 'Artem Atkin'
+                        email = 'atkinarv@sibur.ru'
+                    }
+                    developer {
+                        id = 'ma1uta'
+                        name = 'Anatoly Sablin'
+                        email = 'tolya@sablin.xyz'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/Ailuroedus/template-engine'
+                    developerConnection = 'scm:git:ssh://github.com/Ailuroedus/template-engine'
+                    url = 'https://github.com/Ailuroedus/template-engine/tree/main'
+                }
+            }
+        }
+    }
 }
